@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trade Journal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    #date-time {
+      text-align: center;
+      margin-top: 20px;
+    }
+  
+    .container {
+      width: 70%;
+      margin: 0 auto;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #000;
+    }
+  
+    th, td {
+      padding: 8px;
+      border: 1px solid #000;
+    }
+  
+    form {
+      margin-top: 20px;
+    }
+  
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+  
+    select, input[type="text"] {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box; /* Include padding and border in the width calculation */
+    }
+
+    .learnings {
+      width: 70%;
+      height: 100%;
+    }
+
+    .fixed-width-column-1,
+    .fixed-width-column-2 {
+      width: 20%;
+    }
+
+    .learnings textarea {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      resize: none;
+      overflow: auto;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .chart-heading {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .chart-image {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .add-image-button {
+      display: block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trade Journal</h1>
+  
+  <div class="container">
+    <div id="date-time"></div>
+    <div class="export-button-container">
+        <button onclick="exportToPdf()">Export to PDF</button>
+    </div>
+    <table>
+      <tbody>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="symbol">Symbol:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <select id="symbol" name="symbol">
+              <option value="BankNifty">BankNifty</option>
+              <option value="Nifty50">Nifty50</option>
+              <option value="Finnifty">Finnifty</option>
+            </select>
+          </td>
+          <td class="learnings">
+            <label for="learnings">Learnings:</label>
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="strike-price">Strike Price:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="strike-price">
+          </td>
+          <td rowspan="7" class="learnings">
+            <textarea name="learnings" rows="7"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="option">Option:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <select id="option" name="option">
+              <option value="CE">CE</option>
+              <option value="PE">PE</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="qty">Qty:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="qty">
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="entry">Entry:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="entry">
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="exit">Exit:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="exit">
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="stoploss">Stoploss:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="stoploss">
+          </td>
+        </tr>
+        <tr>
+          <td class="fixed-width-column-1">
+            <label for="points">Points:</label>
+          </td>
+          <td class="fixed-width-column-2">
+            <input type="text" name="points">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="chart-container">
+      <h2 class="chart-heading">Chart</h2>
+      <div id="chart-preview"></div>
+      <input type="file" id="chart-file" accept="image/*" onchange="previewImage(event)">
+      <button class="add-image-button" onclick="addImage()">Add Image</button>
+    </div>
+  </div>
+
+
+  <script>
+    let imageIndex = 0;
+
+    // Function to display current date and time
+    function displayDateTime() {
+      const now = new Date();
+      const dateTimeElement = document.getElementById('date-time');
+      dateTimeElement.innerHTML = now.toLocaleString();
+    }
+
+
+    // Function to preview the selected image
+    function previewImage(event) {
+        const input = event.target;
+        const reader = new FileReader();
+        reader.onload = function () {
+            const preview = document.getElementById('chart-preview');
+            const image = document.createElement('img');
+            const imageUrl = reader.result;
+            image.src = imageUrl;
+            image.className = 'chart-image';
+            image.addEventListener('click', function () {
+            openImageInNewTab(imageUrl);
+            });
+            preview.appendChild(image);
+            imageIndex++;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+
+    // Function to add an image
+    function addImage() {
+      const fileInput = document.getElementById('chart-file');
+      fileInput.click();
+    }
+
+    // Function to open the image in a new tab
+    function openImageInNewTab(imageUrl) {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.target = '_blank';
+        link.click();
+    }
+
+
+    // Call the functions when the page loads
+    window.onload = function() {
+      displayDateTime();
+    };
+
+    function exportToPdf() {
+        const element = document.body; // Or specify the container element you want to export
+        const currentDate = new Date().toISOString().slice(0, 10); // Get current date in yyyy-mm-dd format
+        const fileName = 'trade_Journal_' + currentDate + '.pdf'; // Construct the file name with the current date
+
+        // Hide buttons and file paths
+        const addImageButton = document.querySelector('.add-image-button');
+        const fileInput = document.getElementById('chart-file');
+        addImageButton.style.display = 'none';
+        fileInput.style.display = 'none';
+
+        // Adjust the height of the textarea
+        const learningsTextarea = document.querySelector('.learnings textarea');
+        learningsTextarea.style.height = 'auto';
+        learningsTextarea.style.height = learningsTextarea.scrollHeight + 'px';
+
+        const options = {
+            filename: fileName,
+            margin: [10, 10, 10, 10], // Specify the margins (top, left, bottom, right)
+            image: { type: 'jpeg', quality: 0.98 }, // Optional: Set image type and quality
+            html2canvas: { scale: 2 }, // Optional: Adjust the scale factor for higher resolution
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } // Optional: Specify PDF format and orientation
+        };
+
+        html2pdf().set(options).from(element).save();
+          // Restore visibility of buttons and file paths
+        addImageButton.style.display = 'block';
+        fileInput.style.display = 'block';
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>
